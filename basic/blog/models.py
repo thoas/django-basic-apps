@@ -53,8 +53,8 @@ class Post(models.Model):
     body            = models.TextField(_('body'), )
     tease           = models.TextField(_('tease'), blank=True, help_text=_('Concise text suggested. Does not appear in RSS feed.'))
 
-    body_markup   = models.TextField(editable=True, blank=True, null=True)
-
+    body_markup     = models.TextField(editable=True, blank=True, null=True)
+    visits          = models.IntegerField(_('visits'), default=0, editable=False) #to keep track of most popular posts
     status          = models.IntegerField(_('status'), choices=STATUS_CHOICES, default=2)
     allow_comments  = models.BooleanField(_('allow comments'), default=True)
     publish         = models.DateTimeField(_('publish'), default=datetime.datetime.now)

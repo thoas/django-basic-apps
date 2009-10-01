@@ -8,11 +8,11 @@ class CategoryAdmin(admin.ModelAdmin):
 admin.site.register(Category, CategoryAdmin)
 
 class PostAdmin(admin.ModelAdmin):
-    list_display  = ('title', 'publish', 'status')
+    list_display  = ('title', 'publish', 'status', 'visits')
     list_filter   = ('publish', 'categories', 'status')
     search_fields = ('title', 'body')
     prepopulated_fields = {'slug': ('title',)}
-    
+
     fieldsets = (
             (None, {
                 'fields': ('title', 'slug', 'author', 'markup',
@@ -25,9 +25,9 @@ class PostAdmin(admin.ModelAdmin):
             }),
 
         )
-    
+
 class SettingsAdmin(admin.ModelAdmin):
-    
+
     fieldsets = (
             (None, {
                 'fields': ('site', 'author_name', 'copyright', 'about',

@@ -12,9 +12,9 @@ import re
 
 
 def post_list(request, page=0, paginate_by=20, **kwargs):
-    
+
     page_size = getattr(settings,'BLOG_PAGESIZE', paginate_by),
-    
+
     return list_detail.object_list(
         request,
         queryset = Post.objects.published(),
@@ -64,17 +64,23 @@ post_archive_day.__doc__ = date_based.archive_day.__doc__
 
 def post_detail(request, slug, year, month, day, **kwargs):
     '''
-    Displays post detail. If user is superuser, view will display 
+    Displays post detail. If user is superuser, view will display
     unpublished post detail for previewing purposes.
-    
+
     '''
-    
+
     posts = None
     if request.user.is_superuser:
         posts = Post.objects.all()
     else:
         posts = Post.objects.published()
-        
+
+    #grab the post and update view count
+    from django.db.models import F
+    post = Post.objects.get(slug=slug)
+    post.visits = F('visits') + 1
+    post.save()
+
     return date_based.object_detail(
         request,
         year = year,
@@ -124,7 +130,7 @@ def category_detail(request, slug, template_name = 'blog/category_detail.html', 
         template_name = template_name,
         **kwargs
     )
-    
+
 
 def tag_detail(request, slug, template_name = 'blog/tag_detail.html', **kwargs):
     """
@@ -138,7 +144,7 @@ def tag_detail(request, slug, template_name = 'blog/tag_detail.html', **kwargs):
             Given tag.
     """
     tag = get_object_or_404(Tag, name__iexact=slug)
-    
+
     return list_detail.object_list(
         request,
         queryset = TaggedItem.objects.get_by_model(Post,tag).filter(status=2),

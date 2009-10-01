@@ -48,6 +48,42 @@ def get_latest_posts(parser, token):
     return LatestPosts(format_string, var_name)
 
 
+class PopularPosts(template.Node):
+    def __init__(self, limit, var_name):
+        self.limit = int(limit)
+        self.var_name = var_name
+
+    def render(self, context):
+        posts = Post.objects.published().order_by('-visits')[:self.limit]
+        if posts and (self.limit == 1):
+            context[self.var_name] = posts[0]
+        else:
+            context[self.var_name] = posts
+        return ''
+
+@register.tag
+def get_popular_posts(parser, token):
+    """
+    Gets any number of most popular posts and stores them in a variable.
+
+    Syntax::
+
+        {% get_popular_posts [limit] as [var_name] %}
+
+    Example usage::
+
+        {% get_popular_posts 10 as popular_post_list %}
+    """
+    try:
+        tag_name, arg = token.contents.split(None, 1)
+    except ValueError:
+        raise template.TemplateSyntaxError, "%s tag requires arguments" % token.contents.split()[0]
+    m = re.search(r'(.*?) as (\w+)', arg)
+    if not m:
+        raise template.TemplateSyntaxError, "%s tag had invalid arguments" % tag_name
+    format_string, var_name = m.groups()
+    return PopularPosts(format_string, var_name)
+
 class BlogCategories(template.Node):
     def __init__(self, var_name):
         self.var_name = var_name
@@ -112,7 +148,7 @@ class BlogRolls(template.Node):
         blogrolls = BlogRoll.objects.all()
         context[self.var_name] = blogrolls
         return ''
-            
+
 @register.tag
 def get_blogroll(parser, token):
     """
