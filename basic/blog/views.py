@@ -70,17 +70,13 @@ def post_detail(request, slug, year, month, day, **kwargs):
 
     '''
 
-    posts = None
-    if request.user.is_superuser:
-        posts = Post.objects.all()
-    else:
-        posts = Post.objects.published()
 
     #grab the post and update view count
     from django.db.models import F
     post = Post.objects.get(slug=slug)
 
-    if post.status != 2:
+
+    if not request.user.is_superuser and post.status != 2:
         raise Http404
 
     post.visits = F('visits') + 1
@@ -93,7 +89,7 @@ def post_detail(request, slug, year, month, day, **kwargs):
         day = day,
         date_field = 'publish',
         slug = slug,
-        queryset = posts,
+        queryset = Post.objects.all(),
         **kwargs
     )
 post_detail.__doc__ = date_based.object_detail.__doc__
