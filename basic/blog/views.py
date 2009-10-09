@@ -79,11 +79,12 @@ def post_detail(request, slug, year, month, day, **kwargs):
     #grab the post and update view count
     from django.db.models import F
     post = Post.objects.get(slug=slug)
-    post.visits = F('visits') + 1
-    post.save()
 
     if post.status != 2:
         raise Http404
+
+    post.visits = F('visits') + 1
+    post.save()
 
     return date_based.object_detail(
         request,
