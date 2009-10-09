@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.conf import settings
 from basic.blog.models import *
 from tagging.models import Tag, TaggedItem
+from django.http import Http404
 
 import datetime
 import re
@@ -80,6 +81,9 @@ def post_detail(request, slug, year, month, day, **kwargs):
     post = Post.objects.get(slug=slug)
     post.visits = F('visits') + 1
     post.save()
+
+    if post.status != 2:
+        raise Http404
 
     return date_based.object_detail(
         request,
