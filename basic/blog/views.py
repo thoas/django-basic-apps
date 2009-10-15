@@ -7,6 +7,7 @@ from django.conf import settings
 from basic.blog.models import *
 from tagging.models import Tag, TaggedItem
 from django.http import Http404
+from basic.models import Settings
 
 import datetime
 import re
@@ -14,7 +15,7 @@ import re
 
 def post_list(request, page=0, paginate_by=20, **kwargs):
 
-    page_size = getattr(settings,'BLOG_PAGESIZE', paginate_by),
+    page_size = Settings.get_current().page_size
 
     return list_detail.object_list(
         request,
