@@ -7,7 +7,7 @@ from django.conf import settings
 from basic.blog.models import *
 from tagging.models import Tag, TaggedItem
 from django.http import Http404
-from basic.models import Settings
+from basic.blog.models import Settings
 
 import datetime
 import re
