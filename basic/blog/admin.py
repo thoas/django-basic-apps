@@ -1,6 +1,6 @@
 from django.contrib import admin
 from basic.blog.models import *
-
+from tinymce.widgets import TinyMCE
 
 class CategoryAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
@@ -13,18 +13,67 @@ class PostAdmin(admin.ModelAdmin):
     search_fields = ('title', 'body')
     prepopulated_fields = {'slug': ('title',)}
 
-    fieldsets = (
+    blog_settings = Settings.get_current()
+    
+    ##remove markup field if tinyMCE is enabled.
+    if blog_settings != None and blog_settings.tinymce_isactive: 
+        fieldsets = (
             (None, {
-                'fields': ('title', 'slug', 'author', 'markup',
+                'fields': ('title', 'slug', 'author',
                         'body', 'tease', 'status', 'allow_comments',
                         'publish', 'categories', 'tags', )
+            }),
+
+        )
+    else:
+        fieldsets = (
+            (None, {
+                'fields': ('title', 'slug', 'author', 'markup',
+                    'body', 'tease', 'status', 'allow_comments',
+                    'publish', 'categories', 'tags', )
             }),
             ('Converted markup', {
                 'classes': ('collapse',),
                 'fields': ('body_markup',),
             }),
-
         )
+        
+    def get_form(self, req, obj=None, **kwargs):
+        # save the currently logged in user for later
+        self.current_user = req.user
+        return super(PostAdmin, self).get_form(req, obj, **kwargs)
+    
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        field = super(PostAdmin, self).formfield_for_dbfield(db_field, **kwargs) # Get the default field
+        
+        blog_settings = Settings.get_current()
+        from django import forms
+        from django.contrib.auth import models
+
+        if db_field.name == 'author':
+            queryset = models.User.objects.all()
+            field = forms.ModelChoiceField(queryset=queryset, initial=self.current_user.id)
+            
+        if db_field.name == 'body' and blog_settings.tinymce_isactive:
+            field.widget = TinyMCE(attrs={'cols': 80, 'rows': 30})
+
+        return field
+
+    def add_view(self, request, form_url='', extra_context=None):
+        blog_settings = Settings.get_current()
+        tinymce_isactive = False
+        if blog_settings != None:
+            tinymce_isactive = blog_settings.tinymce_isactive
+        extra_context = { 'tinymce': tinymce_isactive }            
+        return super(PostAdmin, self).add_view(request, form_url, extra_context)
+        
+    def change_view(self, request, object_id, extra_context=None):
+        blog_settings = Settings.get_current()
+        tinymce_isactive = False        
+        if blog_settings != None:
+            tinymce_isactive = blog_settings.tinymce_isactive
+        extra_context = { 'tinymce': tinymce_isactive }
+        return super(PostAdmin, self).change_view(request, object_id, extra_context)
 
 class SettingsAdmin(admin.ModelAdmin):
 
@@ -32,7 +81,7 @@ class SettingsAdmin(admin.ModelAdmin):
             (None, {
                 'fields': ('site', 'author_name', 'copyright', 'about',
                         'rss_url', 'twitter_url', 'email_subscribe_url', 'page_size',
-                        'ping_google', 'disqus_shortname')
+                        'ping_google', 'disqus_shortname', 'tinymce_isactive',)
             }),
             ('Meta options', {
                 'classes': ('collapse',),

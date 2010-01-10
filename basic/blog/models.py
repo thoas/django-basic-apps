@@ -17,6 +17,10 @@ from django.core.cache import cache
 from django.utils.text import truncate_words
 from sugar.cache.utils import create_cache_key
 
+from django.db.models import signals
+from django.dispatch import dispatcher
+from django_twitter.signals import post_to_twitter
+
 class Category(models.Model):
     """Category model."""
     title       = models.CharField(_('title'), max_length=100)
@@ -87,11 +91,13 @@ class Post(models.Model):
         return u'%s' % self.title
 
     def save(self, *args, **kwargs):
+        blog_settings = Settings.get_current()
+
+        if blog_settings.tinymce_isactive:
+            self.markup = "none"
         body_markup = mark_safe(formatter(self.body, filter_name=self.markup))
         self.body_markup = body_markup
         super(Post, self).save(*args, **kwargs)
-
-        blog_settings = Settings.get_current()
 
         if blog_settings is None:
             return
@@ -130,6 +136,7 @@ class Post(models.Model):
         else:
             return truncate_words(self.tease, 255)
 
+signals.pre_save.connect(post_to_twitter, sender=Post)
 
 class Settings(models.Model):
     '''
@@ -161,6 +168,7 @@ class Settings(models.Model):
 
     meta_keywords = models.TextField(_('meta keywords'), blank=True, null=True)
     meta_description = models.TextField(_('meta description'), blank=True, null=True)
+    tinymce_isactive = models.BooleanField(_('tinymce'), help_text="Activate the TinyMCE editor?", default=False)
 
     class Meta:
         verbose_name = _('settings')
@@ -212,4 +220,3 @@ class BlogRoll(models.Model):
 
     def get_absolute_url(self):
         return self.url
-
