@@ -3,6 +3,7 @@
 {% block extrahead %}
   {% load adminmedia inlines %}
   {{ block.super }}
+
   <script type="text/javascript">
     function InlineInit() {
       var body_div = document.getElementById('id_body').parentNode;
@@ -40,9 +41,9 @@
       div.setAttribute('style', 'margin-top:10px;');
       div.innerHTML = content;
       
-      {% if not tinymce %}
-      body_div.insertBefore(div, document.getElementById('id_body').nextSibling);
-      {% endif %}
+      {% ifequal active_editor "4" %}
+      	body_div.insertBefore(div, document.getElementById('id_body').nextSibling);
+      {% endifequal %}
     }
     
     function insertInline(type, id, classname) {
@@ -56,3 +57,12 @@
     addEvent(window, 'load', InlineInit);
   </script>
 {% endblock %}
+
+{% block footer %}
+{% load wysiwyg %}
+
+{% ifequal active_editor "4" %}
+{% wysiwyg_setup %}
+{% wysiwyg_editor "id_body" %}
+{% endifequal %}
+<div id="footer"></div>{% endblock %}

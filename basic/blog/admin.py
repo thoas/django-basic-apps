@@ -1,6 +1,7 @@
 from django.contrib import admin
 from basic.blog.models import *
 from tinymce.widgets import TinyMCE
+from django.forms.widgets import Textarea
 
 class CategoryAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
@@ -16,7 +17,7 @@ class PostAdmin(admin.ModelAdmin):
     blog_settings = Settings.get_current()
     
     ##remove markup field if tinyMCE is enabled.
-    if blog_settings != None and blog_settings.tinymce_isactive: 
+    if blog_settings != None and blog_settings.active_editor == 4: 
         fieldsets = (
             (None, {
                 'fields': ('title', 'slug', 'author',
@@ -53,8 +54,8 @@ class PostAdmin(admin.ModelAdmin):
         if db_field.name == 'author':
             queryset = models.User.objects.all()
             field = forms.ModelChoiceField(queryset=queryset, initial=self.current_user.id)
-            
-        if db_field.name == 'body' and blog_settings.tinymce_isactive:
+
+        if db_field.name == 'body' and blog_settings.active_editor == 4:
             field.widget = TinyMCE(attrs={'cols': 80, 'rows': 30})
 
         return field
@@ -63,16 +64,16 @@ class PostAdmin(admin.ModelAdmin):
         blog_settings = Settings.get_current()
         tinymce_isactive = False
         if blog_settings != None:
-            tinymce_isactive = blog_settings.tinymce_isactive
-        extra_context = { 'tinymce': tinymce_isactive }            
+            active_editor = blog_settings.active_editor
+        extra_context = { 'active_editor': active_editor }            
         return super(PostAdmin, self).add_view(request, form_url, extra_context)
         
     def change_view(self, request, object_id, extra_context=None):
         blog_settings = Settings.get_current()
         tinymce_isactive = False        
         if blog_settings != None:
-            tinymce_isactive = blog_settings.tinymce_isactive
-        extra_context = { 'tinymce': tinymce_isactive }
+            active_editor = blog_settings.active_editor
+        extra_context = { 'active_editor': active_editor }
         return super(PostAdmin, self).change_view(request, object_id, extra_context)
 
 class SettingsAdmin(admin.ModelAdmin):
@@ -81,7 +82,7 @@ class SettingsAdmin(admin.ModelAdmin):
             (None, {
                 'fields': ('site', 'author_name', 'copyright', 'about',
                         'rss_url', 'twitter_url', 'email_subscribe_url', 'page_size',
-                        'ping_google', 'disqus_shortname', 'tinymce_isactive',)
+                        'ping_google', 'disqus_shortname', 'active_editor',)
             }),
             ('Meta options', {
                 'classes': ('collapse',),

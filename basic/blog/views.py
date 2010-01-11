@@ -44,6 +44,7 @@ def post_archive_month(request, year, month, **kwargs):
         request,
         year = year,
         month = month,
+        month_format='%m',
         date_field = 'publish',
         queryset = Post.objects.published(),
         **kwargs
@@ -57,12 +58,12 @@ def post_archive_day(request, year, month, day, **kwargs):
         year = year,
         month = month,
         day = day,
+        month_format='%m',
         date_field = 'publish',
         queryset = Post.objects.published(),
         **kwargs
     )
 post_archive_day.__doc__ = date_based.archive_day.__doc__
-
 
 def post_detail(request, slug, year, month, day, **kwargs):
     '''
@@ -71,22 +72,28 @@ def post_detail(request, slug, year, month, day, **kwargs):
 
     '''
 
-
     #grab the post and update view count
     from django.db.models import F
     post = Post.objects.get(slug=slug)
 
-
     if not request.user.is_superuser and post.status != 2:
         raise Http404
 
-    post.visits = F('visits') + 1
-    post.save()
+    if not request.META.get('REMOTE_ADDR') in settings.INTERNAL_IPS:
+        post.visits = F('visits') + 1
+        post.save()
+        
+    #to handle legacy abbreviate locale month name
+    import time
+    month_format = '%b'
+    if len(month) < 3:
+        month_format = '%m'
 
     return date_based.object_detail(
         request,
         year = year,
         month = month,
+        month_format = month_format,
         day = day,
         date_field = 'publish',
         slug = slug,

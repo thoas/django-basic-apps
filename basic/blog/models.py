@@ -95,13 +95,13 @@ class Post(models.Model):
 
         if blog_settings.tinymce_isactive:
             self.markup = "none"
-        body_markup = mark_safe(formatter(self.body, filter_name=self.markup))
-        self.body_markup = body_markup
+            self.body_markup = self.body
+        else:                
+            self.body_markup = mark_safe(formatter(self.body, filter_name=self.markup))
         super(Post, self).save(*args, **kwargs)
 
-        if blog_settings is None:
-            return
-        elif blog_settings.ping_google:
+        ping_google = getattr(blog_settings,"ping_google", False)
+        if ping_google:
             try:
                 ping_google()
             except:
@@ -109,9 +109,9 @@ class Post(models.Model):
 
     @permalink
     def get_absolute_url(self):
-        return ('blog_detail', None, {
+        return ('blog_detail_month_numeric', None, {
             'year': self.publish.year,
-            'month': self.publish.strftime('%b').lower(),
+            'month': self.publish.strftime('%m').lower(),
             'day': self.publish.day,
             'slug': self.slug
         })
@@ -147,6 +147,12 @@ class Settings(models.Model):
     Possible: dynamic settings could be designed at some point to allow the user to add settings as they wish.
     '''
 
+    EDITOR_CHOICES = (
+        (1, _('Text')),
+        (2, _('YUI')),
+        (3, _('CKEditor')),
+        (4, _('FCKEditor')),
+    )
     site = models.ForeignKey(Site, unique=True)
 
     #denormalized to reduce queries
@@ -169,6 +175,7 @@ class Settings(models.Model):
     meta_keywords = models.TextField(_('meta keywords'), blank=True, null=True)
     meta_description = models.TextField(_('meta description'), blank=True, null=True)
     tinymce_isactive = models.BooleanField(_('tinymce'), help_text="Activate the TinyMCE editor?", default=False)
+    active_editor = models.IntegerField(_('status'), choices=EDITOR_CHOICES, default=1)
 
     class Meta:
         verbose_name = _('settings')
