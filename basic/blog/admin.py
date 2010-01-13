@@ -17,7 +17,7 @@ class PostAdmin(admin.ModelAdmin):
     blog_settings = Settings.get_current()
     
     ##remove markup field if tinyMCE is enabled.
-    if blog_settings != None and blog_settings.active_editor == 4: 
+    if blog_settings != None and blog_settings.active_editor in [2,3] : 
         fieldsets = (
             (None, {
                 'fields': ('title', 'slug', 'author',

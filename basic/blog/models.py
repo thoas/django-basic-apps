@@ -101,6 +101,7 @@ class Post(models.Model):
         super(Post, self).save(*args, **kwargs)
 
         ping_google = getattr(blog_settings,"ping_google", False)
+        
         if ping_google:
             try:
                 ping_google()
