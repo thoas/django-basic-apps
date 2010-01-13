@@ -55,7 +55,7 @@ class PostAdmin(admin.ModelAdmin):
             queryset = models.User.objects.all()
             field = forms.ModelChoiceField(queryset=queryset, initial=self.current_user.id)
 
-        if db_field.name == 'body' and blog_settings.active_editor == 4:
+        if db_field.name == 'body' and blog_settings.active_editor == 2:
             field.widget = TinyMCE(attrs={'cols': 80, 'rows': 30})
 
         return field

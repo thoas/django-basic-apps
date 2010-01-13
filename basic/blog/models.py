@@ -149,9 +149,8 @@ class Settings(models.Model):
 
     EDITOR_CHOICES = (
         (1, _('Text')),
-        (2, _('YUI')),
-        (3, _('CKEditor')),
-        (4, _('FCKEditor')),
+        (2, _('FCKEditor')),
+        (3, _('Django-WYSIWYG')),
     )
     site = models.ForeignKey(Site, unique=True)
 

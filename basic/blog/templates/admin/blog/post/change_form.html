@@ -58,11 +58,12 @@
   </script>
 {% endblock %}
 
-{% block footer %}
-{% load wysiwyg %}
 
-{% ifequal active_editor "4" %}
+{% block footer %}
+{% ifequal active_editor 3 %}
+{% load wysiwyg %}
 {% wysiwyg_setup %}
 {% wysiwyg_editor "id_body" %}
 {% endifequal %}
-<div id="footer"></div>{% endblock %}
+<div id="footer"></div>
+{% endblock %}
