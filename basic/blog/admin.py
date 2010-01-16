@@ -17,7 +17,7 @@ class PostAdmin(admin.ModelAdmin):
     blog_settings = Settings.get_current()
     
     ##remove markup field if tinyMCE is enabled.
-    if blog_settings != None and blog_settings.active_editor in [2,3] : 
+    if blog_settings != None and blog_settings.active_editor > 1 : 
         fieldsets = (
             (None, {
                 'fields': ('title', 'slug', 'author',
@@ -82,7 +82,7 @@ class SettingsAdmin(admin.ModelAdmin):
             (None, {
                 'fields': ('site', 'author_name', 'copyright', 'about',
                         'rss_url', 'twitter_url', 'email_subscribe_url', 'page_size',
-                        'ping_google', 'disqus_shortname', 'active_editor',)
+                        'ping_google', 'disqus_shortname', 'active_editor','excerpt_length',)
             }),
             ('Meta options', {
                 'classes': ('collapse',),

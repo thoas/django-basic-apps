@@ -93,7 +93,7 @@ class Post(models.Model):
     def save(self, *args, **kwargs):
         blog_settings = Settings.get_current()
 
-        if blog_settings.tinymce_isactive:
+        if blog_settings.active_editor > 1:
             self.markup = "none"
             self.body_markup = self.body
         else:                
@@ -150,7 +150,7 @@ class Settings(models.Model):
 
     EDITOR_CHOICES = (
         (1, _('Text')),
-        (2, _('FCKEditor')),
+        (2, _('TinyMCE')),
         (3, _('Django-WYSIWYG')),
     )
     site = models.ForeignKey(Site, unique=True)
@@ -174,8 +174,9 @@ class Settings(models.Model):
 
     meta_keywords = models.TextField(_('meta keywords'), blank=True, null=True)
     meta_description = models.TextField(_('meta description'), blank=True, null=True)
-    tinymce_isactive = models.BooleanField(_('tinymce'), help_text="Activate the TinyMCE editor?", default=False)
     active_editor = models.IntegerField(_('status'), choices=EDITOR_CHOICES, default=1)
+    excerpt_length = models.IntegerField(_('excerpt length'), default=500, 
+                    help_text=_('The character length of the post body field displayed in RSS templates.'))
 
     class Meta:
         verbose_name = _('settings')
