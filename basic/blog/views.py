@@ -65,30 +65,37 @@ def post_archive_day(request, year, month, day, **kwargs):
     )
 post_archive_day.__doc__ = date_based.archive_day.__doc__
 
+
 def post_detail(request, slug, year, month, day, **kwargs):
     '''
     Displays post detail. If user is superuser, view will display
     unpublished post detail for previewing purposes.
-
     '''
-
-    #grab the post and update view count
-    from django.db.models import F
-    post = Post.objects.get(slug=slug)
-
+ 
+    #to handle legacy abbreviate locale month name
+    month_format = '%b'
+    if len(month) < 3:
+        month_format = '%m'
+ 
+    # This logic completely duplicates date_based.object_detail but allows us
+    # to increment the view count for each post at the cost of a duplicate
+    # query and some extra parsing:
+    try:
+        tt = time.strptime('%s-%s-%s' % (year, month, day), '%%Y-%s-%%d' % month_format)
+    except ValueError:
+        raise Http404
+ 
+    # Fixed bug loading multiple slugs differing only in date:
+    post = get_object_or_404(Post, slug=slug, publish__year=tt.tm_year, publish__month=tt.tm_mon, publish__day=tt.tm_mday)
+ 
+    #if user is not superuser then don't allow viewing of non-public posts
     if not request.user.is_superuser and post.status != 2:
         raise Http404
-
+ 
     if not request.META.get('REMOTE_ADDR') in settings.INTERNAL_IPS:
         post.visits = F('visits') + 1
         post.save()
         
-    #to handle legacy abbreviate locale month name
-    import time
-    month_format = '%b'
-    if len(month) < 3:
-        month_format = '%m'
-
     return date_based.object_detail(
         request,
         year = year,
@@ -101,6 +108,15 @@ def post_detail(request, slug, year, month, day, **kwargs):
         **kwargs
     )
 post_detail.__doc__ = date_based.object_detail.__doc__
+
+
+def post_pk_redirect(request, pk):
+    """
+    Utility view for migrating from legacy blog systems. Assuming that your
+    importer keeps the primary keys intact
+    """
+    p = get_object_or_404(Post, pk=pk)
+    return HttpResponsePermanentRedirect(p.get_absolute_url())
 
 
 def category_list(request, template_name = 'blog/category_list.html', **kwargs):

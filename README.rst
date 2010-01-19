@@ -18,6 +18,9 @@ Dependancies
 * Django Tagging (http://code.google.com/p/django-tagging)
 * Markdown (http://www.djangoproject.com/documentation/add_ons/#markup)
 * BeautifulSoup (http://www.crummy.com/software/BeautifulSoup/) is required to use the blog and, subsequently, the inlines app.
+* Django-Tinymce (http://code.google.com/p/django-tinymce/) for TinyMCE support.
+* Django-Twitter (http://github.com/skevy/django-twitter/) for Twitter support.
+* Django-Bitly (http://bitbucket.org/discovery/django-bitly/) for Bitly support.
 
 Inlines
 =======
