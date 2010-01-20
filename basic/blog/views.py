@@ -1,16 +1,17 @@
+import datetime
+import re
+import time
+ 
+from django.db.models import Q, F
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.http import Http404
 from django.views.generic import date_based, list_detail
-from django.db.models import Q
 from django.conf import settings
+
 from basic.blog.models import *
 from tagging.models import Tag, TaggedItem
-from django.http import Http404
 from basic.blog.models import Settings
-
-import datetime
-import re
 
 
 def post_list(request, page=0, paginate_by=20, **kwargs):
