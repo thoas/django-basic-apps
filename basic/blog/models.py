@@ -174,7 +174,7 @@ class Settings(models.Model):
 
     meta_keywords = models.TextField(_('meta keywords'), blank=True, null=True)
     meta_description = models.TextField(_('meta description'), blank=True, null=True)
-    active_editor = models.IntegerField(_('status'), choices=EDITOR_CHOICES, default=1)
+    active_editor = models.IntegerField(_('editor'), choices=EDITOR_CHOICES, default=1)
     excerpt_length = models.IntegerField(_('excerpt length'), default=500, 
                     help_text=_('The character length of the post body field displayed in RSS templates.'))
 
