@@ -40,10 +40,14 @@ def post_to_twitter(sender, instance, **kwargs):
     #if the instance already existed
     if instance.pk:
         #grab the previous instance of the object
-        prior_instance = instance._default_manager.get(pk=instance.pk)
-        prior_status = getattr(prior_instance, "status", 1)
-        #if this post was published
-        if prior_status == 2:
+        try:
+            prior_instance = instance._default_manager.get(pk=instance.pk)
+            prior_status = getattr(prior_instance, "status", 1)
+            #if this post was published
+            if prior_status == 2:
+                return False
+        except:
+            #todo: better logging/handling
             return False
         
     accounts = TwitterAccount.objects.all()
