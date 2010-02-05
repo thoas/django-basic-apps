@@ -19,7 +19,6 @@ from sugar.cache.utils import create_cache_key
 
 from django.db.models import signals
 from django.dispatch import dispatcher
-from django_twitter.signals import post_to_twitter
 
 class Category(models.Model):
     """Category model."""
@@ -136,8 +135,6 @@ class Post(models.Model):
             return Settings.get_current().meta_description
         else:
             return truncate_words(self.tease, 255)
-
-signals.pre_save.connect(post_to_twitter, sender=Post)
 
 class Settings(models.Model):
     '''
